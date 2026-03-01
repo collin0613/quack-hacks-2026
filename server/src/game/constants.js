@@ -8,11 +8,16 @@ export const PLAYER_R = 35;
 /** Must match client BALL_R so collision shape matches drawn circle. */
 export const BALL_R = 24;
 
+/** Goal opening = middle third of end line (match client). */
+export const GOAL_WIDTH = FIELD_H / 3;
+/** Goal depth (match client); used for “fully in goal” check. */
+export const GOAL_DEPTH = GOAL_WIDTH / 2;
+
 /** Tick rate in ms (e.g. 60 fps) */
 export const TICK_RATE_MS = 1000 / 60;
 
 /** Max player speed in pixels per second (input -1..1 scaled) */
-export const MAX_PLAYER_SPEED = 280;
+export const MAX_PLAYER_SPEED = 200;
 
 /** Ball restitution (bounciness) vs players */
 export const BALL_RESTITUTION = 0.8;

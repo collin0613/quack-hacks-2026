@@ -4,6 +4,7 @@ import {
   FIELD_H,
   PLAYER_R,
   BALL_R,
+  GOAL_WIDTH,
   MAX_PLAYER_SPEED,
   BALL_RESTITUTION,
   BALL_FRICTION,
@@ -164,16 +165,35 @@ export class GameRoom {
       ball.vy = -Math.abs(ball.vy) * 0.9;
     }
 
-    // Goals: left/right out of bounds
+    // End lines (match client constants): goal opening = middle third of end line.
+    // Let ball pass through when in opening; score when full ball is past the line, then reset.
+    const goalTop = (FIELD_H - GOAL_WIDTH) / 2;
+    const inGoalOpeningY = (y) =>
+      y - ball.radius >= goalTop && y + ball.radius <= goalTop + GOAL_WIDTH;
+
+    // Left goal (line at x = 0): only bounce if outside goal opening; else let ball through to score
     if (ball.x - ball.radius <= 0) {
-      this.state.score.right += 1;
-      this.resetBall();
-      return;
+      if (ball.x + ball.radius <= 0 && inGoalOpeningY(ball.y)) {
+        this.state.score.right += 1;
+        this.resetAfterGoal();
+        return;
+      }
+      if (!inGoalOpeningY(ball.y)) {
+        ball.vx = Math.abs(ball.vx) * 0.9;
+        ball.x = ball.radius;
+      }
     }
+    // Right goal (line at x = FIELD_W)
     if (ball.x + ball.radius >= FIELD_W) {
-      this.state.score.left += 1;
-      this.resetBall();
-      return;
+      if (ball.x - ball.radius >= FIELD_W && inGoalOpeningY(ball.y)) {
+        this.state.score.left += 1;
+        this.resetAfterGoal();
+        return;
+      }
+      if (!inGoalOpeningY(ball.y)) {
+        ball.vx = -Math.abs(ball.vx) * 0.9;
+        ball.x = FIELD_W - ball.radius;
+      }
     }
 
     // Player–ball collision (order can matter for multiple players; iterate all)
@@ -187,6 +207,18 @@ export class GameRoom {
     this.ball.y = FIELD_H / 2;
     this.ball.vx = 0;
     this.ball.vy = 0;
+  }
+
+  /** Reset ball and players to starting positions after a goal. */
+  resetAfterGoal() {
+    this.resetBall();
+    const margin = 100;
+    for (const p of this.players.values()) {
+      p.x = p.side === "left" ? margin : FIELD_W - margin;
+      p.y = FIELD_H / 2;
+      p.vx = 0;
+      p.vy = 0;
+    }
   }
 
   /**

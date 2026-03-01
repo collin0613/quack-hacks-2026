@@ -12,7 +12,8 @@ import {
 
 /** Out-of-bounds color: matches page background (see index.css --canvas-out-of-bounds). */
 function getOutOfBoundsColor() {
-  if (typeof document === "undefined" || !document.documentElement) return "#242424";
+  if (typeof document === "undefined" || !document.documentElement)
+    return "#242424";
   const v = getComputedStyle(document.documentElement)
     .getPropertyValue("--canvas-out-of-bounds")
     .trim();
@@ -82,7 +83,6 @@ function drawGoalNetting(p, x, y, w, h) {
     const dy = Math.sin(angleRad);
     const px = Math.cos(perpRad);
     const py = Math.sin(perpRad);
-    const extent = Math.max(w, h) * 2;
     const steps = Math.ceil((w + h) / spacing) + 2;
     const startX = x + w / 2 - (steps / 2) * spacing * px;
     const startY = y + h / 2 - (steps / 2) * spacing * py;
@@ -92,12 +92,7 @@ function drawGoalNetting(p, x, y, w, h) {
       const seg = clipLineToRect(ox, oy, dx, dy, x, y, w, h);
       if (seg) {
         const [t0, t1] = seg;
-        p.line(
-          ox + t0 * dx,
-          oy + t0 * dy,
-          ox + t1 * dx,
-          oy + t1 * dy
-        );
+        p.line(ox + t0 * dx, oy + t0 * dy, ox + t1 * dx, oy + t1 * dy);
       }
     }
   }
@@ -143,7 +138,12 @@ export function drawField(p) {
   p.stroke(255);
   p.strokeWeight(2);
   p.rect(FIELD_OFFSET_X, 0, FIELD_W, FIELD_H);
-  p.line(FIELD_OFFSET_X + FIELD_W / 2, 0, FIELD_OFFSET_X + FIELD_W / 2, FIELD_H);
+  p.line(
+    FIELD_OFFSET_X + FIELD_W / 2,
+    0,
+    FIELD_OFFSET_X + FIELD_W / 2,
+    FIELD_H,
+  );
 
   // 18-yard / goalie boxes (rectangular border around each goal)
   const leftBoxX = FIELD_OFFSET_X;
@@ -163,9 +163,17 @@ export function drawField(p) {
   p.noStroke();
 }
 
+/** Goal opening Y bounds (field coords). Matches server logic for bounce vs goal. */
+export function getGoalOpeningBounds() {
+  const yMin = (FIELD_H - GOAL_WIDTH) / 2;
+  const yMax = yMin + GOAL_WIDTH;
+  return { yMin, yMax };
+}
+
 /**
- * Check if the ball is fully inside a goal (for scoring). Uses field coordinates:
- * x in [0, FIELD_W], y in [0, FIELD_H]. Left goal is at x <= 0, right at x >= FIELD_W.
+ * True only when the ball has fully crossed the end-line plane within the goal opening.
+ * Ball must be entirely past the line and entirely within the goal’s vertical opening.
+ * Used for consistent client-side checks; server is authoritative.
  * @param {number} ballX - ball center x (field coords)
  * @param {number} ballY - ball center y (field coords)
  * @param {number} ballR - ball radius
@@ -173,18 +181,14 @@ export function drawField(p) {
  * @returns {boolean}
  */
 export function isBallInGoal(ballX, ballY, ballR, side) {
-  const half = GOAL_WIDTH / 2;
-  const goalCenterY = FIELD_H / 2;
-  const yMin = goalCenterY - half;
-  const yMax = goalCenterY + half;
-
+  const { yMin, yMax } = getGoalOpeningBounds();
   const inVerticalBounds = ballY - ballR >= yMin && ballY + ballR <= yMax;
 
   if (side === "left") {
-    return ballX - ballR <= 0 && inVerticalBounds;
+    return ballX + ballR <= 0 && inVerticalBounds;
   }
   if (side === "right") {
-    return ballX + ballR >= FIELD_W && inVerticalBounds;
+    return ballX - ballR >= FIELD_W && inVerticalBounds;
   }
   return false;
 }
