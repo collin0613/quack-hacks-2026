@@ -40,3 +40,140 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Lobby intro screen */
+.lobby.intro-screen {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+}
+
+.lobby-title {
+  margin: 0 0 1.5rem;
+  font-size: 2.75rem;
+  font-weight: 700;
+}
+
+.lobby-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.lobby-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+}
+
+.lobby-status-dot.connected {
+  background: #22c55e;
+}
+
+.lobby-status-dot.disconnected {
+  background: #ef4444;
+}
+
+.lobby-join {
+  margin-bottom: 1rem;
+}
+
+.lobby-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: left;
+}
+
+.lobby-join-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.lobby-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.lobby-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.lobby-btn {
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lobby-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.lobby-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lobby-error {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-radius: 6px;
+  text-align: left;
+}
+
+.lobby-room {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.lobby-room-name,
+.lobby-side,
+.lobby-players {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.lobby-player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.lobby-player-list li {
+  padding: 0.25rem 0;
+}
+
+.lobby-btn-ready {
+  width: 100%;
+  margin-top: 0.5rem;
+  background: #16a34a;
+}
+
+.lobby-btn-ready:hover:not(:disabled) {
+  background: #15803d;
+}
