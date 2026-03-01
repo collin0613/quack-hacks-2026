@@ -1,7 +1,6 @@
 import { Server } from "socket.io";
 import { GameRoom } from "../game/GameRoom.js";
 
-const TICK_MS = 50;
 
 export function setupSocket(httpServer) {
   const io = new Server(httpServer, {
@@ -48,14 +47,6 @@ export function setupSocket(httpServer) {
       }
     });
 
-    socket.on("player_input", (payload) => {
-      const { roomId, vx, vy, kick } = payload ?? {};
-      const gameRoom = gameRooms[roomId];
-      if (!gameRoom) return;
-
-      gameRoom.setInput(socket.id, { vx, vy, kick });
-    });
-
     socket.on("disconnect", () => {
       console.log("Socket disconnected:", socket.id);
 
@@ -71,16 +62,6 @@ export function setupSocket(httpServer) {
       }
     });
   });
-
-  setInterval(() => {
-    const now = Date.now();
-    for (const [roomId, gameRoom] of Object.entries(gameRooms)) {
-      if (gameRoom.started) {
-        gameRoom.tick(TICK_MS);
-        io.to(roomId).emit("game_state", gameRoom.snapshot());
-      }
-    }
-  }, TICK_MS);
 
   return io;
 }
