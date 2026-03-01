@@ -9,6 +9,7 @@ import {
   BALL_RESTITUTION,
   BALL_FRICTION,
   BALL_STOP_THRESHOLD,
+  FIELD_CORNER_R,
 } from "./constants.js";
 import { resolveCircleCircleCollision } from "./CollisionDetection.js";
 
@@ -132,9 +133,28 @@ export class GameRoom {
       p.vy = p.input.vy * MAX_PLAYER_SPEED;
       p.x += p.vx * dtSec;
       p.y += p.vy * dtSec;
-      // Clamp to field
+      // Clamp to field (rect first)
       p.x = Math.max(p.radius, Math.min(FIELD_W - p.radius, p.x));
       p.y = Math.max(p.radius, Math.min(FIELD_H - p.radius, p.y));
+      // Rounded corners: push player out of corner cutouts
+      const pInsetR = Math.max(1, FIELD_CORNER_R - p.radius);
+      const pCorners = [
+        { cx: FIELD_CORNER_R, cy: FIELD_CORNER_R, inQ: (x, y) => x < FIELD_CORNER_R && y < FIELD_CORNER_R },
+        { cx: FIELD_W - FIELD_CORNER_R, cy: FIELD_CORNER_R, inQ: (x, y) => x > FIELD_W - FIELD_CORNER_R && y < FIELD_CORNER_R },
+        { cx: FIELD_CORNER_R, cy: FIELD_H - FIELD_CORNER_R, inQ: (x, y) => x < FIELD_CORNER_R && y > FIELD_H - FIELD_CORNER_R },
+        { cx: FIELD_W - FIELD_CORNER_R, cy: FIELD_H - FIELD_CORNER_R, inQ: (x, y) => x > FIELD_W - FIELD_CORNER_R && y > FIELD_H - FIELD_CORNER_R },
+      ];
+      for (const c of pCorners) {
+        if (!c.inQ(p.x, p.y)) continue;
+        const pdx = p.x - c.cx;
+        const pdy = p.y - c.cy;
+        const pdist = Math.hypot(pdx, pdy) || 1;
+        if (pdist >= FIELD_CORNER_R) continue; // only push when inside corner circle
+        const pnx = pdx / pdist;
+        const pny = pdy / pdist;
+        p.x = c.cx + pnx * pInsetR;
+        p.y = c.cy + pny * pInsetR;
+      }
     }
 
     // Player–player collision (push apart and bounce)
@@ -155,14 +175,45 @@ export class GameRoom {
     ball.x += ball.vx * dtSec;
     ball.y += ball.vy * dtSec;
 
-    // Ball vs top/bottom walls (bounce)
-    if (ball.y - ball.radius <= 0) {
+    // Top/bottom walls (only in straight region; corners handled separately)
+    const inTopBottomStraight =
+      ball.x >= FIELD_CORNER_R && ball.x <= FIELD_W - FIELD_CORNER_R;
+    if (inTopBottomStraight && ball.y - ball.radius <= 0) {
       ball.y = ball.radius;
       ball.vy = Math.abs(ball.vy) * 0.9;
     }
-    if (ball.y + ball.radius >= FIELD_H) {
+    if (inTopBottomStraight && ball.y + ball.radius >= FIELD_H) {
       ball.y = FIELD_H - ball.radius;
       ball.vy = -Math.abs(ball.vy) * 0.9;
+    }
+
+    // Rounded corners: ball must stay outside the corner cutouts. Push to inset arc.
+    const ballInsetR = Math.max(1, FIELD_CORNER_R - ball.radius);
+    const corners = [
+      { cx: FIELD_CORNER_R, cy: FIELD_CORNER_R, inQ: (x, y) => x < FIELD_CORNER_R && y < FIELD_CORNER_R },
+      { cx: FIELD_W - FIELD_CORNER_R, cy: FIELD_CORNER_R, inQ: (x, y) => x > FIELD_W - FIELD_CORNER_R && y < FIELD_CORNER_R },
+      { cx: FIELD_CORNER_R, cy: FIELD_H - FIELD_CORNER_R, inQ: (x, y) => x < FIELD_CORNER_R && y > FIELD_H - FIELD_CORNER_R },
+      { cx: FIELD_W - FIELD_CORNER_R, cy: FIELD_H - FIELD_CORNER_R, inQ: (x, y) => x > FIELD_W - FIELD_CORNER_R && y > FIELD_H - FIELD_CORNER_R },
+    ];
+    for (const c of corners) {
+      if (!c.inQ(ball.x, ball.y)) continue;
+      const dx = ball.x - c.cx;
+      const dy = ball.y - c.cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist >= FIELD_CORNER_R) continue; // only push when inside corner circle
+      // Push ball to the inset arc (ball.radius away from the visual corner arc)
+      const nx = dx / dist;
+      const ny = dy / dist;
+      ball.x = c.cx + nx * ballInsetR;
+      ball.y = c.cy + ny * ballInsetR;
+      // Reflect velocity about the normal
+      const vn = ball.vx * nx + ball.vy * ny;
+      if (vn < 0) {
+        ball.vx -= 2 * vn * nx;
+        ball.vy -= 2 * vn * ny;
+        ball.vx *= 0.9;
+        ball.vy *= 0.9;
+      }
     }
 
     // End lines (match client constants): goal opening = middle third of end line.
@@ -200,6 +251,10 @@ export class GameRoom {
     for (const p of this.players.values()) {
       resolveCircleCircleCollision(p, ball, BALL_RESTITUTION);
     }
+
+    // Safety clamp: keep ball in the rounded-rect bounds (rect with corner margin)
+    ball.x = Math.max(ball.radius, Math.min(FIELD_W - ball.radius, ball.x));
+    ball.y = Math.max(ball.radius, Math.min(FIELD_H - ball.radius, ball.y));
   }
 
   resetBall() {

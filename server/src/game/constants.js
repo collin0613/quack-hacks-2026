@@ -27,3 +27,6 @@ export const BALL_FRICTION = 0.985;
 
 /** Speed below this is zeroed (stops tiny drift). */
 export const BALL_STOP_THRESHOLD = 2;
+
+/** Corner radius for rounded field (ball bounces off arc instead of sharp corner). */
+export const FIELD_CORNER_R = 50;

@@ -4,6 +4,7 @@ import {
   GOAL_WIDTH,
   GOAL_DEPTH,
   FIELD_OFFSET_X,
+  FIELD_CORNER_R,
   CENTER_CIRCLE_R,
   CENTER_DOT_R,
   GOAL_BOX_DEPTH,
@@ -110,10 +111,10 @@ export function drawField(p) {
 
   const goalTop = (FIELD_H - GOAL_WIDTH) / 2;
 
-  // Playable field rectangle only (green) — corners stay page background
+  // Playable field rectangle only (green) — rounded corners
   p.noStroke();
   p.fill(34, 139, 34);
-  p.rect(FIELD_OFFSET_X, 0, FIELD_W, FIELD_H);
+  p.rect(FIELD_OFFSET_X, 0, FIELD_W, FIELD_H, FIELD_CORNER_R);
 
   // Left goal (extends from x=0 to end line at FIELD_OFFSET_X)
   p.fill(240, 240, 245);
@@ -137,7 +138,7 @@ export function drawField(p) {
   p.noFill();
   p.stroke(255);
   p.strokeWeight(2);
-  p.rect(FIELD_OFFSET_X, 0, FIELD_W, FIELD_H);
+  p.rect(FIELD_OFFSET_X, 0, FIELD_W, FIELD_H, FIELD_CORNER_R);
   p.line(
     FIELD_OFFSET_X + FIELD_W / 2,
     0,

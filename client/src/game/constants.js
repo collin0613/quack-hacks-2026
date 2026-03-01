@@ -30,3 +30,6 @@ export const CENTER_DOT_R = 5;
 /** 18-yard / goalie box: depth from goal line into field, width (wider than goal). */
 export const GOAL_BOX_DEPTH = Math.round(FIELD_W * 0.16);
 export const GOAL_BOX_WIDTH = Math.round(FIELD_H * 0.48);
+
+/** Corner radius for rounded field (must match server FIELD_CORNER_R). */
+export const FIELD_CORNER_R = 50;
