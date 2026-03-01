@@ -8,6 +8,7 @@ import {
   getSocketId,
   isConnected,
 } from "../network/socket.js";
+import { setRoomId as setGameStoreRoomId } from "../game/gameStateStore.js";
 import "../App.css";
 
 /**
@@ -49,6 +50,7 @@ function Lobby({ onGameStart }) {
       setRoomId(id);
       setMySide(side);
       setError(null);
+      setGameStoreRoomId(id);
     });
     const unJoinError = on("join_error", ({ message }) => {
       setError(message);
@@ -56,6 +58,7 @@ function Lobby({ onGameStart }) {
     const unRoomState = on("room_state", (state) => {
       setRoomId(state.roomId);
       setPlayers(state.players ?? []);
+      if (state.roomId) setGameStoreRoomId(state.roomId);
     });
     const unGameStart = on("game_start", () => {
       setGameStarted(true);
