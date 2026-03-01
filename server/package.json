@@ -4,10 +4,15 @@
   "description": "",
   "license": "ISC",
   "author": "Vincent Cancelliere, Jason Casper, Collin Smith, Tristan Mikiewicz",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
   }
 }
