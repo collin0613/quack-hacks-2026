@@ -163,9 +163,17 @@ export function drawField(p) {
   p.noStroke();
 }
 
+/** Goal opening Y bounds (field coords). Matches server logic for bounce vs goal. */
+export function getGoalOpeningBounds() {
+  const yMin = (FIELD_H - GOAL_WIDTH) / 2;
+  const yMax = yMin + GOAL_WIDTH;
+  return { yMin, yMax };
+}
+
 /**
- * Check if the ball is fully inside a goal (for scoring). Uses field coordinates:
- * x in [0, FIELD_W], y in [0, FIELD_H]. Left goal is at x <= 0, right at x >= FIELD_W.
+ * True only when the ball has fully crossed the end-line plane within the goal opening.
+ * Ball must be entirely past the line and entirely within the goal’s vertical opening.
+ * Used for consistent client-side checks; server is authoritative.
  * @param {number} ballX - ball center x (field coords)
  * @param {number} ballY - ball center y (field coords)
  * @param {number} ballR - ball radius
@@ -173,18 +181,14 @@ export function drawField(p) {
  * @returns {boolean}
  */
 export function isBallInGoal(ballX, ballY, ballR, side) {
-  const half = GOAL_WIDTH / 2;
-  const goalCenterY = FIELD_H / 2;
-  const yMin = goalCenterY - half;
-  const yMax = goalCenterY + half;
-
+  const { yMin, yMax } = getGoalOpeningBounds();
   const inVerticalBounds = ballY - ballR >= yMin && ballY + ballR <= yMax;
 
   if (side === "left") {
-    return ballX - ballR <= 0 && inVerticalBounds;
+    return ballX + ballR <= 0 && inVerticalBounds;
   }
   if (side === "right") {
-    return ballX + ballR >= FIELD_W && inVerticalBounds;
+    return ballX - ballR >= FIELD_W && inVerticalBounds;
   }
   return false;
 }

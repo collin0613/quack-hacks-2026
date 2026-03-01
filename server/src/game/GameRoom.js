@@ -4,6 +4,7 @@ import {
   FIELD_H,
   PLAYER_R,
   BALL_R,
+  GOAL_WIDTH,
   MAX_PLAYER_SPEED,
   BALL_RESTITUTION,
   BALL_FRICTION,
@@ -164,16 +165,28 @@ export class GameRoom {
       ball.vy = -Math.abs(ball.vy) * 0.9;
     }
 
-    // Goals: left/right out of bounds
+    // End lines: score only when ball has fully crossed the plane inside the goal opening; else bounce
+    const goalTop = (FIELD_H - GOAL_WIDTH) / 2;
+    const goalBottom = goalTop + GOAL_WIDTH;
+    const inGoalOpeningY = (y) => y - ball.radius >= goalTop && y + ball.radius <= goalBottom;
+
     if (ball.x - ball.radius <= 0) {
-      this.state.score.right += 1;
-      this.resetBall();
-      return;
+      if (ball.x + ball.radius <= 0 && inGoalOpeningY(ball.y)) {
+        this.state.score.right += 1;
+        this.resetBall();
+        return;
+      }
+      ball.vx = Math.abs(ball.vx) * 0.9;
+      ball.x = ball.radius;
     }
     if (ball.x + ball.radius >= FIELD_W) {
-      this.state.score.left += 1;
-      this.resetBall();
-      return;
+      if (ball.x - ball.radius >= FIELD_W && inGoalOpeningY(ball.y)) {
+        this.state.score.left += 1;
+        this.resetBall();
+        return;
+      }
+      ball.vx = -Math.abs(ball.vx) * 0.9;
+      ball.x = FIELD_W - ball.radius;
     }
 
     // Player–ball collision (order can matter for multiple players; iterate all)
