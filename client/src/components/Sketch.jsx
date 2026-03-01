@@ -16,12 +16,14 @@ import { getGazeVector } from '../input/gazeVector.js';
 export default function Sketch() {
   const containerRef = useRef(null);
 
+  // Player communication
   useEffect(() => {
     connect();
     const unGameState = on('game_state', (snapshot) => setGameState(snapshot));
     return () => unGameState();
   }, []);
 
+  // p5 sketch
   useEffect(() => {
     const node = containerRef.current;
     if (!node || typeof window.p5 === 'undefined') return;
@@ -31,16 +33,19 @@ export default function Sketch() {
         preloadFaceMesh();
       };
 
+      // p5 setup
       p.setup = function () {
         p.createCanvas(FIELD_W, FIELD_H);
         setupFaceMesh(p);
         initCalibration(p);
       };
 
+      // p5 draw
       p.draw = function () {
         const { score, players } = getGameState();
         const myId = getSocketId();
 
+        // Draw UI
         drawField(p);
         drawScoreboard(p, score);
         drawPlayers(p, players, myId);
