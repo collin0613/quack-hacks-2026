@@ -89,6 +89,16 @@ export function markReady(roomId) {
 }
 
 /**
+ * Set or update this client's display name in the room.
+ * @param {string} roomId - Current room
+ * @param {string} displayName - Name to show (replaces default "Player 1"/"Player 2")
+ */
+export function setDisplayName(roomId, displayName) {
+  if (!socket) return;
+  socket.emit("set_display_name", { roomId, displayName: String(displayName ?? "").trim() });
+}
+
+/**
  * Send movement and kick input (e.g. from ML5 head pose + blink). Call every frame or when input changes.
  * @param {string} roomId - Current room
  * @param {{ vx?: number, vy?: number, kick?: boolean }} input - Normalized velocity -1..1, kick = blink

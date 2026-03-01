@@ -59,6 +59,14 @@ export function setupSocket(httpServer) {
       }
     });
 
+    socket.on("set_display_name", ({ roomId: rid, displayName }) => {
+      const room = gameRooms[rid];
+      if (room) {
+        room.setDisplayName(socket.id, displayName);
+        io.to(rid).emit("room_state", room.roomState());
+      }
+    });
+
     socket.on("player_input", ({ roomId: rid, vx, vy, kick }) => {
       const room = gameRooms[rid];
       if (room && room.started) room.applyPlayerInput(socket.id, { vx, vy, kick });

@@ -156,6 +156,18 @@
   color: #374151;
 }
 
+.lobby-display-name {
+  margin-bottom: 1rem;
+}
+
+.lobby-display-name label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: left;
+}
+
 .lobby-player-list {
   list-style: none;
   padding: 0;
