@@ -3,7 +3,6 @@ import {
   connect,
   joinRoom,
   markReady,
-  sendInput,
   on,
   getSocketId,
   isConnected,
@@ -12,38 +11,29 @@ import { setRoomId as setGameStoreRoomId } from "../game/gameStateStore.js";
 import "../App.css";
 
 /**
- * Lobby
- * Use the same room id in two browser tabs (e.g. "test") to verify join, room_state, ready, game_start, and game_state.
+ * Intro screen: room ID, join, connection status. After join, shows room and ready flow.
  * @param {{ onGameStart?: () => void }} props - onGameStart called when server emits game_start (both players ready).
  */
 function Lobby({ onGameStart }) {
-  const [roomIdInput, setRoomIdInput] = useState("test");
+  const [roomIdInput, setRoomIdInput] = useState("");
   const [roomId, setRoomId] = useState(null);
   const [mySide, setMySide] = useState(null);
   const [players, setPlayers] = useState([]);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameState, setGameState] = useState(null);
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
-  const [socketId, setSocketId] = useState(null);
   const onGameStartRef = useRef(onGameStart);
 
   useEffect(() => {
     onGameStartRef.current = onGameStart;
   }, [onGameStart]);
 
-  // Connect on mount and subscribe to socket events
   useEffect(() => {
     connect();
     queueMicrotask(() => {
       setConnected(isConnected());
-      setSocketId(getSocketId());
     });
 
-    const unConnect = on("connect", () => {
-      setConnected(true);
-      setSocketId(getSocketId());
-    });
+    const unConnect = on("connect", () => setConnected(true));
     const unDisconnect = on("disconnect", () => setConnected(false));
 
     const unJoined = on("joined_room", ({ roomId: id, side }) => {
@@ -52,19 +42,15 @@ function Lobby({ onGameStart }) {
       setError(null);
       setGameStoreRoomId(id);
     });
-    const unJoinError = on("join_error", ({ message }) => {
-      setError(message);
-    });
+    const unJoinError = on("join_error", ({ message }) => setError(message));
     const unRoomState = on("room_state", (state) => {
       setRoomId(state.roomId);
       setPlayers(state.players ?? []);
       if (state.roomId) setGameStoreRoomId(state.roomId);
     });
     const unGameStart = on("game_start", () => {
-      setGameStarted(true);
       onGameStartRef.current?.();
     });
-    const unGameState = on("game_state", (snapshot) => setGameState(snapshot));
 
     return () => {
       unConnect();
@@ -73,7 +59,6 @@ function Lobby({ onGameStart }) {
       unJoinError();
       unRoomState();
       unGameStart();
-      unGameState();
     };
   }, []);
 
@@ -82,8 +67,6 @@ function Lobby({ onGameStart }) {
     const id = roomIdInput.trim();
     if (!id) return;
     setError(null);
-    setGameStarted(false);
-    setGameState(null);
     joinRoom(id);
   };
 
@@ -92,93 +75,65 @@ function Lobby({ onGameStart }) {
     markReady(roomId);
   };
 
-  const handleSendInput = () => {
-    if (!roomId) return;
-    sendInput(roomId, { vx: 0.5, vy: 0, kick: false });
-  };
+  const socketId = getSocketId();
+  const imReady = players.find((p) => p.id === socketId)?.ready ?? false;
 
   return (
-    <div style={{ padding: "1.5rem", maxWidth: 480, margin: "0 auto", fontFamily: "system-ui" }}>
-      <h1 style={{ marginTop: 0 }}>Socket test</h1>
+    <div className="lobby intro-screen">
+      <h1 className="lobby-title">'Head' Soccer</h1>
 
-      <section style={{ marginBottom: "1.5rem" }}>
-        <div style={{ color: connected ? "green" : "red", fontWeight: "bold" }}>
-          {connected ? "Connected" : "Disconnected"}
-        </div>
-        {socketId && (
-          <div style={{ fontSize: "0.85rem", color: "#666" }}>Socket ID: {socketId}</div>
-        )}
-      </section>
+      <div className="lobby-status" aria-live="polite">
+        <span className={`lobby-status-dot ${connected ? "connected" : "disconnected"}`} />
+        {connected ? "Connected" : "Disconnected"}
+      </div>
 
-      <section style={{ marginBottom: "1.5rem" }}>
-        <form onSubmit={handleJoin} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <label htmlFor="room-id">Room ID</label>
+      <form onSubmit={handleJoin} className="lobby-join">
+        <label htmlFor="room-id" className="lobby-label">Room code</label>
+        <div className="lobby-join-row">
           <input
             id="room-id"
             type="text"
             value={roomIdInput}
             onChange={(e) => setRoomIdInput(e.target.value)}
-            placeholder="e.g. test"
-            style={{ padding: "0.35rem 0.5rem", flex: 1 }}
+            placeholder="Enter room code"
+            className="lobby-input"
+            autoComplete="off"
           />
-          <button type="submit" disabled={!connected}>Join</button>
-        </form>
-        <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
-          Use the same room ID in both tabs (e.g. &quot;test&quot;) to join the same room.
-        </p>
-      </section>
+          <button type="submit" className="lobby-btn" disabled={!connected}>
+            Join
+          </button>
+        </div>
+      </form>
 
       {error && (
-        <div style={{ padding: "0.5rem", background: "#fee", color: "#c00", marginBottom: "1rem" }}>
+        <div className="lobby-error" role="alert">
           {error}
         </div>
       )}
 
       {roomId && (
-        <>
-          <section style={{ marginBottom: "1.5rem" }}>
-            <h2 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>Room: {roomId}</h2>
-            {mySide && <div>Your side: <strong>{mySide}</strong></div>}
-            <div style={{ marginTop: "0.5rem" }}>
-              <strong>Players ({players.length}/2)</strong>
-              <ul style={{ listStyle: "none", paddingLeft: 0, textAlign: "left" }}>
-                {players.map((p) => (
-                  <li key={p.id} style={{ padding: "0.25rem 0" }}>
-                    {p.id === socketId ? "(you) " : ""}
-                    {p.side} — {p.ready ? "Ready" : "Not ready"}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <button onClick={handleReady} disabled={players.find((p) => p.id === socketId)?.ready}>
-              I&apos;m ready
-            </button>
-          </section>
-
-          {gameStarted && (
-            <section style={{ marginBottom: "1.5rem", padding: "0.75rem", background: "#efe", borderRadius: 4 }}>
-              <strong>Game started</strong>
-              <button onClick={handleSendInput} style={{ marginLeft: "0.5rem" }}>
-                Send test input (vx=0.5)
-              </button>
-            </section>
+        <section className="lobby-room">
+          <p className="lobby-room-name">Room: <strong>{roomId}</strong></p>
+          {mySide && (
+            <p className="lobby-side">You’re on <strong>{mySide}</strong></p>
           )}
-
-          {gameState && (
-            <section style={{ fontSize: "0.9rem" }}>
-              <h3 style={{ marginBottom: "0.5rem" }}>Last game state</h3>
-              <div>Score: left {gameState.score?.left ?? 0} – right {gameState.score?.right ?? 0}</div>
-              <div style={{ marginTop: "0.5rem" }}>
-                {Object.entries(gameState.players ?? {}).map(([id, p]) => (
-                  <div key={id}>
-                    {id === socketId ? "(you) " : ""}
-                    {p.side}: x={Number(p.x).toFixed(0)}, y={Number(p.y).toFixed(0)}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </>
+          <p className="lobby-players">Players: {players.length}/2</p>
+          <ul className="lobby-player-list">
+            {players.map((p) => (
+              <li key={p.id}>
+                {p.id === socketId ? "You" : p.side} — {p.ready ? "Ready" : "Waiting"}
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            className="lobby-btn lobby-btn-ready"
+            onClick={handleReady}
+            disabled={imReady}
+          >
+            {imReady ? "Ready" : "I’m ready"}
+          </button>
+        </section>
       )}
     </div>
   );
