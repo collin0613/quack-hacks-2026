@@ -1,4 +1,4 @@
-import { FIELD_W } from '../game/constants.js';
+import { CANVAS_W } from '../game/constants.js';
 
 /**
  * Draw the score display. Call from Sketch draw().
@@ -11,5 +11,5 @@ export function drawScoreboard(p, score) {
   p.fill(255);
   p.textSize(28);
   p.textAlign(p.CENTER, p.TOP);
-  p.text(`${left} – ${right}`, FIELD_W / 2, 12);
+  p.text(`${left} – ${right}`, CANVAS_W / 2, 12);
 }

@@ -6,6 +6,8 @@
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
+  --canvas-out-of-bounds: #242424;
+  --goal-net-color: rgba(145, 145, 145, 0.85);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -58,6 +60,8 @@ button:focus-visible {
   :root {
     color: #213547;
     background-color: #ffffff;
+    --canvas-out-of-bounds: #ffffff;
+    --goal-net-color:  rgba(145, 145, 145, 0.85);
   }
   a:hover {
     color: #747bff;

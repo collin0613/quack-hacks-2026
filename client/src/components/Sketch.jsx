@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { connect, on, getSocketId, sendInput } from '../network/socket.js';
 import { setGameState, getGameState, getRoomId } from '../game/gameStateStore.js';
-import { FIELD_W, FIELD_H } from '../game/constants.js';
+import { CANVAS_W, CANVAS_H, SCOREBOARD_HEIGHT } from '../game/constants.js';
 import { drawField } from '../ui/Field.js';
 import { drawScoreboard } from '../ui/Scoreboard.js';
 import { drawPlayers } from '../mechanics/Players.js';
@@ -35,7 +35,7 @@ export default function Sketch() {
 
       // p5 setup
       p.setup = function () {
-        p.createCanvas(FIELD_W, FIELD_H);
+        p.createCanvas(CANVAS_W, CANVAS_H + SCOREBOARD_HEIGHT);
         setupFaceMesh(p);
         initCalibration(p);
       };
@@ -45,10 +45,14 @@ export default function Sketch() {
         const { score, players } = getGameState();
         const myId = getSocketId();
 
-        // Draw UI
+        // Field and players (translated down so score band stays clear)
+        p.push();
+        p.translate(0, SCOREBOARD_HEIGHT);
         drawField(p);
-        drawScoreboard(p, score);
         drawPlayers(p, players, myId);
+        p.pop();
+        // Scoreboard in top band (drawn last so it isn’t cleared by field background)
+        drawScoreboard(p, score);
 
         // Send head-based input
         const roomId = getRoomId();
