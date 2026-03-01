@@ -18,7 +18,7 @@ import { io } from "socket.io-client";
  *   - game_state { roomId, started, score, players } → per-tick snapshot (players: id -> { x, y, side, ready })
  */
 
-const DEFAULT_SERVER_URL = "http://localhost:3000";
+const DEFAULT_SERVER_URL = "https://janise-preneolithic-joie.ngrok-free.dev";
 
 let socket = null;
 const listeners = {
