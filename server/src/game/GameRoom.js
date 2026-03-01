@@ -38,10 +38,12 @@ export class GameRoom {
     if (this.isFull()) return { ok: false, error: "Room full." };
 
     const side = this.playerCount() === 0 ? "left" : "right";
+    const displayName = side === "left" ? "Player 1" : "Player 2";
 
     this.players.set(socketId, {
       id: socketId,
       side,
+      displayName,
       ready: false,
       x: 0,
       y: 0,
@@ -108,6 +110,13 @@ export class GameRoom {
   /**
    * Apply client input for this tick. Call when server receives player_input.
    */
+  setDisplayName(socketId, displayName) {
+    const p = this.players.get(socketId);
+    if (!p) return;
+    const s = String(displayName ?? "").trim();
+    p.displayName = s || (p.side === "left" ? "Player 1" : "Player 2");
+  }
+
   applyPlayerInput(socketId, { vx = 0, vy = 0, kick = false } = {}) {
     const p = this.players.get(socketId);
     if (!p) return;
@@ -289,6 +298,7 @@ export class GameRoom {
       players[id] = {
         id: p.id,
         side: p.side,
+        displayName: p.displayName,
         ready: p.ready,
         x: p.x,
         y: p.y,
@@ -312,6 +322,7 @@ export class GameRoom {
       players: Array.from(this.players.values()).map((p) => ({
         id: p.id,
         side: p.side,
+        displayName: p.displayName,
         ready: p.ready,
       })),
     };

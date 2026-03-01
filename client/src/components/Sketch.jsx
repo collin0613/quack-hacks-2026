@@ -3,10 +3,11 @@ import { connect, on, getSocketId, sendInput } from '../network/socket.js';
 import { setGameState, getGameState, getRoomId } from '../game/gameStateStore.js';
 import { CANVAS_W, CANVAS_H, SCOREBOARD_HEIGHT } from '../game/constants.js';
 import { drawField } from '../ui/Field.js';
-import { drawScoreboard } from '../ui/Scoreboard.js';
+import { drawScoreboard, drawPlayerNames } from '../ui/Scoreboard.js';
 import { drawOverlay } from '../ui/overlay.js';
 import { drawPlayers } from '../mechanics/Players.js';
 import { drawBall } from '../mechanics/Ball.js';
+import soccerBallSrc from '../photos/soccer_ball.png';
 import { preloadFaceMesh, setupFaceMesh, getFaces } from '../input/faceMesh.js';
 import { initCalibration, getReferencePoint } from '../input/calibration.js';
 import { getGazeVector } from '../input/gazeVector.js';
@@ -30,9 +31,11 @@ export default function Sketch() {
     const node = containerRef.current;
     if (!node || typeof window.p5 === 'undefined') return;
 
+    let ballImage = null;
     const sketch = (p) => {
       p.preload = function () {
         preloadFaceMesh();
+        ballImage = p.loadImage(soccerBallSrc);
       };
 
       // p5 setup
@@ -53,11 +56,12 @@ export default function Sketch() {
         p.translate(0, SCOREBOARD_HEIGHT);
         drawField(p);
         drawPlayers(p, players, myId);
-        drawBall(p, ball);
+        drawBall(p, ball, ballImage);
         drawOverlay(p, gaze);
         p.pop();
         // Scoreboard in top band (drawn last so it isn’t cleared by field background)
         drawScoreboard(p, score);
+        drawPlayerNames(p, players);
 
         // Send head-based input
         const roomId = getRoomId();

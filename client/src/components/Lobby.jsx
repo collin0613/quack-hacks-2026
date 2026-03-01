@@ -3,6 +3,7 @@ import {
   connect,
   joinRoom,
   markReady,
+  setDisplayName,
   on,
   getSocketId,
   isConnected,
@@ -14,10 +15,13 @@ import "../App.css";
  * Intro screen: room ID, join, connection status. After join, shows room and ready flow.
  * @param {{ onGameStart?: () => void }} props - onGameStart called when server emits game_start (both players ready).
  */
+const SIDE_COLORS = { left: "#e53935", right: "#1e88e5" };
+
 function Lobby({ onGameStart }) {
   const [roomIdInput, setRoomIdInput] = useState("");
   const [roomId, setRoomId] = useState(null);
   const [mySide, setMySide] = useState(null);
+  const [displayNameInput, setDisplayNameInput] = useState("");
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -39,6 +43,7 @@ function Lobby({ onGameStart }) {
     const unJoined = on("joined_room", ({ roomId: id, side }) => {
       setRoomId(id);
       setMySide(side);
+      setDisplayNameInput(side === "left" ? "Player 1" : "Player 2");
       setError(null);
       setGameStoreRoomId(id);
     });
@@ -73,6 +78,10 @@ function Lobby({ onGameStart }) {
   const handleReady = () => {
     if (!roomId) return;
     markReady(roomId);
+  };
+
+  const handleDisplayNameBlur = () => {
+    if (roomId) setDisplayName(roomId, displayNameInput);
   };
 
   const socketId = getSocketId();
@@ -117,11 +126,28 @@ function Lobby({ onGameStart }) {
           {mySide && (
             <p className="lobby-side">You’re on <strong>{mySide}</strong></p>
           )}
+          <div className="lobby-display-name">
+            <label htmlFor="display-name">Display name</label>
+            <input
+              id="display-name"
+              type="text"
+              value={displayNameInput}
+              onChange={(e) => setDisplayNameInput(e.target.value)}
+              onBlur={handleDisplayNameBlur}
+              placeholder={mySide === "left" ? "Player 1" : "Player 2"}
+              className="lobby-input"
+              maxLength={24}
+              style={{ color: mySide ? SIDE_COLORS[mySide] : undefined }}
+            />
+          </div>
           <p className="lobby-players">Players: {players.length}/2</p>
           <ul className="lobby-player-list">
             {players.map((p) => (
-              <li key={p.id}>
-                {p.id === socketId ? "You" : p.side} — {p.ready ? "Ready" : "Waiting"}
+              <li
+                key={p.id}
+                style={{ color: SIDE_COLORS[p.side] ?? "#ccc" }}
+              >
+                {p.id === socketId ? "You" : ""} {p.displayName || p.side} — {p.ready ? "Ready" : "Waiting"}
               </li>
             ))}
           </ul>
