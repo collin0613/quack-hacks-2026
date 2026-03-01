@@ -1,10 +1,20 @@
-import './App.css'
+import { useState } from 'react';
+import './App.css';
+import Lobby from './Lobby';
+import SketchCanvas from './components/SketchCanvas';
 
-function App() {
+export default function App() {
+  const [view, setView] = useState('setup'); // 'setup' | 'game'
 
   return (
-    <div>Hello World</div>
-  )
-}
+    <div className="app">
+      {view === 'setup' && (
+        <Lobby />
 
-export default App
+      )}
+      {view === 'game' && (
+        <SketchCanvas />
+      )}
+    </div>
+  );
+}
