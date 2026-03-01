@@ -252,8 +252,12 @@ export class GameRoom {
       resolveCircleCircleCollision(p, ball, BALL_RESTITUTION);
     }
 
-    // Safety clamp: keep ball in the rounded-rect bounds (rect with corner margin)
-    ball.x = Math.max(ball.radius, Math.min(FIELD_W - ball.radius, ball.x));
+    // Safety clamp: keep ball in bounds, but allow it to cross goal lines when in the opening
+    const inLeftGoalZone = inGoalOpeningY(ball.y) && ball.x - ball.radius <= 0;
+    const inRightGoalZone = inGoalOpeningY(ball.y) && ball.x + ball.radius >= FIELD_W;
+    if (!inLeftGoalZone && !inRightGoalZone) {
+      ball.x = Math.max(ball.radius, Math.min(FIELD_W - ball.radius, ball.x));
+    }
     ball.y = Math.max(ball.radius, Math.min(FIELD_H - ball.radius, ball.y));
   }
 
