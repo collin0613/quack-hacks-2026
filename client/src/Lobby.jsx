@@ -11,10 +11,10 @@ import {
 import "./App.css";
 
 /**
- * Temporary socket testing page.
+ * Lobby
  * Use the same room id in two browser tabs (e.g. "test") to verify join, room_state, ready, game_start, and game_state.
  */
-function App() {
+function Lobby() {
   const [roomIdInput, setRoomIdInput] = useState("test");
   const [roomId, setRoomId] = useState(null);
   const [mySide, setMySide] = useState(null);
@@ -170,4 +170,4 @@ function App() {
   );
 }
 
-export default App;
+export default Lobby;
