@@ -12,7 +12,8 @@ import {
 
 /** Out-of-bounds color: matches page background (see index.css --canvas-out-of-bounds). */
 function getOutOfBoundsColor() {
-  if (typeof document === "undefined" || !document.documentElement) return "#242424";
+  if (typeof document === "undefined" || !document.documentElement)
+    return "#242424";
   const v = getComputedStyle(document.documentElement)
     .getPropertyValue("--canvas-out-of-bounds")
     .trim();
@@ -82,7 +83,6 @@ function drawGoalNetting(p, x, y, w, h) {
     const dy = Math.sin(angleRad);
     const px = Math.cos(perpRad);
     const py = Math.sin(perpRad);
-    const extent = Math.max(w, h) * 2;
     const steps = Math.ceil((w + h) / spacing) + 2;
     const startX = x + w / 2 - (steps / 2) * spacing * px;
     const startY = y + h / 2 - (steps / 2) * spacing * py;
@@ -92,12 +92,7 @@ function drawGoalNetting(p, x, y, w, h) {
       const seg = clipLineToRect(ox, oy, dx, dy, x, y, w, h);
       if (seg) {
         const [t0, t1] = seg;
-        p.line(
-          ox + t0 * dx,
-          oy + t0 * dy,
-          ox + t1 * dx,
-          oy + t1 * dy
-        );
+        p.line(ox + t0 * dx, oy + t0 * dy, ox + t1 * dx, oy + t1 * dy);
       }
     }
   }
@@ -143,7 +138,12 @@ export function drawField(p) {
   p.stroke(255);
   p.strokeWeight(2);
   p.rect(FIELD_OFFSET_X, 0, FIELD_W, FIELD_H);
-  p.line(FIELD_OFFSET_X + FIELD_W / 2, 0, FIELD_OFFSET_X + FIELD_W / 2, FIELD_H);
+  p.line(
+    FIELD_OFFSET_X + FIELD_W / 2,
+    0,
+    FIELD_OFFSET_X + FIELD_W / 2,
+    FIELD_H,
+  );
 
   // 18-yard / goalie boxes (rectangular border around each goal)
   const leftBoxX = FIELD_OFFSET_X;

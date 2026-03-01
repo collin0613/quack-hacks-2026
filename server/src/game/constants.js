@@ -17,7 +17,7 @@ export const GOAL_DEPTH = GOAL_WIDTH / 2;
 export const TICK_RATE_MS = 1000 / 60;
 
 /** Max player speed in pixels per second (input -1..1 scaled) */
-export const MAX_PLAYER_SPEED = 280;
+export const MAX_PLAYER_SPEED = 200;
 
 /** Ball restitution (bounciness) vs players */
 export const BALL_RESTITUTION = 0.8;

@@ -18,7 +18,11 @@ import { io } from "socket.io-client";
  *   - game_state { roomId, started, score, players } → per-tick snapshot (players: id -> { x, y, side, ready })
  */
 
-const DEFAULT_SERVER_URL = "http://localhost:3000";
+/** Use same origin so Vite proxy (or ngrok) can forward /socket.io to the game server. */
+function getServerUrl() {
+  if (typeof window === "undefined") return "http://localhost:3000";
+  return window.location.origin;
+}
 
 let socket = null;
 const listeners = {
@@ -43,10 +47,11 @@ function emit(event, ...args) {
 
 /**
  * Connect to the game server. Safe to call again; reuses existing socket.
- * @param {string} [serverUrl] - Base URL of the server (default http://localhost:3000)
+ * Uses same origin by default so proxy/ngrok works (Mac + iPad both hit the same tunnel).
+ * @param {string} [serverUrl] - Base URL (default: current page origin)
  * @returns {import("socket.io-client").Socket}
  */
-export function connect(serverUrl = DEFAULT_SERVER_URL) {
+export function connect(serverUrl = getServerUrl()) {
   if (socket?.connected) return socket;
 
   socket = io(serverUrl, {
