@@ -7,6 +7,7 @@ let roomId = null;
 let state = {
   score: { left: 0, right: 0 },
   players: {},
+  ball: { x: 400, y: 300 },
 };
 
 export function setRoomId(id) {
@@ -22,6 +23,7 @@ export function setGameState(snapshot) {
   state = {
     score: snapshot.score ?? { left: 0, right: 0 },
     players: snapshot.players ?? {},
+    ball: snapshot.ball ?? { x: 400, y: 300 },
   };
 }
 

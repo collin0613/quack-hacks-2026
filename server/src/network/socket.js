@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { GameRoom } from "../game/GameRoom.js";
-
+import { TICK_RATE_MS } from "../game/constants.js";
 
 export function setupSocket(httpServer) {
   const io = new Server(httpServer, {
@@ -8,6 +8,17 @@ export function setupSocket(httpServer) {
   });
 
   const gameRooms = {}; // roomId -> GameRoom
+
+  // Game tick: update started rooms and broadcast game_state
+  const dtSec = TICK_RATE_MS / 1000;
+  setInterval(() => {
+    for (const [roomId, room] of Object.entries(gameRooms)) {
+      if (room.started && room.ball) {
+        room.tick(dtSec);
+        io.to(roomId).emit("game_state", room.getGameState());
+      }
+    }
+  }, TICK_RATE_MS);
 
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
@@ -44,7 +55,13 @@ export function setupSocket(httpServer) {
       if (gameRoom.allReadyForStart()) {
         gameRoom.startGame();
         io.to(roomId).emit("game_start");
+        io.to(roomId).emit("game_state", gameRoom.getGameState());
       }
+    });
+
+    socket.on("player_input", ({ roomId: rid, vx, vy, kick }) => {
+      const room = gameRooms[rid];
+      if (room && room.started) room.applyPlayerInput(socket.id, { vx, vy, kick });
     });
 
     socket.on("disconnect", () => {
