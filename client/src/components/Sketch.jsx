@@ -4,6 +4,7 @@ import { setGameState, getGameState, getRoomId } from '../game/gameStateStore.js
 import { CANVAS_W, CANVAS_H, SCOREBOARD_HEIGHT } from '../game/constants.js';
 import { drawField } from '../ui/Field.js';
 import { drawScoreboard } from '../ui/Scoreboard.js';
+import { drawOverlay } from '../ui/overlay.js';
 import { drawPlayers } from '../mechanics/Players.js';
 import { drawBall } from '../mechanics/Ball.js';
 import { preloadFaceMesh, setupFaceMesh, getFaces } from '../input/faceMesh.js';
@@ -45,6 +46,7 @@ export default function Sketch() {
       p.draw = function () {
         const { score, players, ball } = getGameState();
         const myId = getSocketId();
+        const gaze = getGazeVector(getFaces(), getReferencePoint());
 
         // Field and players (translated down so score band stays clear)
         p.push();
@@ -52,6 +54,7 @@ export default function Sketch() {
         drawField(p);
         drawPlayers(p, players, myId);
         drawBall(p, ball);
+        drawOverlay(p, gaze);
         p.pop();
         // Scoreboard in top band (drawn last so it isn’t cleared by field background)
         drawScoreboard(p, score);
