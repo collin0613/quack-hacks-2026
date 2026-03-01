@@ -1,3 +1,19 @@
-# quack-hacks-2026
+# QuackHacks
 
-This is a 2D web Socket.io soccer game, where player controls are determined by movement of the head. We are planning to use ML5 and P5 JS packages. The frontend will be a topdown soccer field where two players connect via a room code and Socket.io and go head to head playing soccer and controlling their circle avatar by moving their head and colliding into the ball, and possibly tracking a blink as a "kick".
+## Running locally
+
+1. **Start the game server** (socket.io + game logic, port 3000):
+   ```bash
+   cd server && npm start
+   ```
+   You should see: `Server listening on http://localhost:3000`
+
+2. **Start the client** (Vite dev server, port 5173):
+   ```bash
+   cd client && npm run dev
+   ```
+   Open http://localhost:5173 in your browser.
+
+3. **Test two players**: Open **two browser tabs** (or two windows) to http://localhost:5173. Both tabs connect to the same server. Use the same room ID (e.g. `test`) in both, click Join, then "I'm ready" in both. When both are ready, the game starts and the view switches to the p5 canvas.
+
+If the Lobby shows **Disconnected**, the server is not running—start it from the `server` folder first.

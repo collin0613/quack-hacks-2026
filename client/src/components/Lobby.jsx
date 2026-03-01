@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   connect,
   joinRoom,
@@ -7,14 +7,15 @@ import {
   on,
   getSocketId,
   isConnected,
-} from "./network/socket.js";
-import "./App.css";
+} from "../network/socket.js";
+import "../App.css";
 
 /**
  * Lobby
  * Use the same room id in two browser tabs (e.g. "test") to verify join, room_state, ready, game_start, and game_state.
+ * @param {{ onGameStart?: () => void }} props - onGameStart called when server emits game_start (both players ready).
  */
-function Lobby() {
+function Lobby({ onGameStart }) {
   const [roomIdInput, setRoomIdInput] = useState("test");
   const [roomId, setRoomId] = useState(null);
   const [mySide, setMySide] = useState(null);
@@ -24,12 +25,19 @@ function Lobby() {
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
   const [socketId, setSocketId] = useState(null);
+  const onGameStartRef = useRef(onGameStart);
+
+  useEffect(() => {
+    onGameStartRef.current = onGameStart;
+  }, [onGameStart]);
 
   // Connect on mount and subscribe to socket events
   useEffect(() => {
     connect();
-    setConnected(isConnected());
-    setSocketId(getSocketId());
+    queueMicrotask(() => {
+      setConnected(isConnected());
+      setSocketId(getSocketId());
+    });
 
     const unConnect = on("connect", () => {
       setConnected(true);
@@ -49,7 +57,10 @@ function Lobby() {
       setRoomId(state.roomId);
       setPlayers(state.players ?? []);
     });
-    const unGameStart = on("game_start", () => setGameStarted(true));
+    const unGameStart = on("game_start", () => {
+      setGameStarted(true);
+      onGameStartRef.current?.();
+    });
     const unGameState = on("game_state", (snapshot) => setGameState(snapshot));
 
     return () => {

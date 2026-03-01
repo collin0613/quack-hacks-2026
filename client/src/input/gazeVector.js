@@ -1,7 +1,4 @@
-/**
- * Gaze vector: offset from the calibration reference point to the nose (keypoint 19).
- * Pure helper; combine face keypoints and reference point from faceMesh + calibration.
- */
+//Gaze vector: offset from the calibration reference point to the nose (keypoint 19).
 
 const NOSE_KEYPOINT_INDEX = 19;
 

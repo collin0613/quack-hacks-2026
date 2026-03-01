@@ -1,17 +1,14 @@
-// Reference point calibration: click on the canvas to set a reference point.
+// Reference point for gaze vector (nose offset). Set to canvas center by initCalibration(p).
 
 let referencePoint = null;
 
 /**
- * Registers a mouse press handler on the given p5 instance to set the reference point.
- * @param {import('p5')} p - p5 instance (use when running in instance mode, e.g. React).
+ * Sets the reference point to the center of the given p5 canvas.
+ * Call from p5 setup() after createCanvas so width/height are set.
+ * @param {import('p5')} p - p5 instance.
  */
 export function initCalibration(p) {
-  p.mousePressed = function calibrationMousePressed() {
-    if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
-      referencePoint = { x: p.mouseX, y: p.mouseY };
-    }
-  };
+  referencePoint = { x: p.width / 2, y: p.height / 2 };
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './App.css';
-import Lobby from './Lobby';
-import SketchCanvas from './components/SketchCanvas';
+import Lobby from './components/Lobby';
+import Field from './ui/Field';
 
 export default function App() {
   const [view, setView] = useState('setup'); // 'setup' | 'game'
@@ -9,11 +9,10 @@ export default function App() {
   return (
     <div className="app">
       {view === 'setup' && (
-        <Lobby />
-
+        <Lobby onGameStart={() => setView('game')} />
       )}
       {view === 'game' && (
-        <SketchCanvas />
+        <Field />
       )}
     </div>
   );

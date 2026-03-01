@@ -1,4 +1,4 @@
-//Exposes video stream and current face keypoints for use by gaze vector and main.
+// Exposes video stream and current face keypoints for use by gaze vector and main.
 
 const NOSE_KEYPOINT_INDEX = 19;
 const options = { maxFaces: 1, refineLandmarks: false, flipped: true };
