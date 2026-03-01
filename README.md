@@ -1,1 +1,3 @@
 # quack-hacks-2026
+
+This is a 2D web Socket.io soccer game, where player controls are determined by movement of the head. We are planning to use ML5 and P5 JS packages. The frontend will be a topdown soccer field where two players connect via a room code and Socket.io and go head to head playing soccer and controlling their circle avatar by moving their head and colliding into the ball, and possibly tracking a blink as a "kick".
